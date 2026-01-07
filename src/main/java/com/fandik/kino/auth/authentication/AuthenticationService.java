@@ -20,9 +20,9 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegistrationRequest request) {
         var user = UserEntity.builder()
-                .name(request.getJmeno())
+                .name(request.getName())
                 .login(request.getLogin())
-                .password(passwordEncoder.encode(request.getHeslo()))
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role(UserEntity.Role.ROLE_USER)
                 .build();
         repository.save(user);
@@ -31,7 +31,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getHeslo()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword()));
         var user = repository.findByLogin(request.getLogin()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder().token(jwtToken).build();
