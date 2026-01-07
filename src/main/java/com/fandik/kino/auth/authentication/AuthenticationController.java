@@ -12,12 +12,12 @@ public class AuthenticationController {
 
     private final AuthenticationService service;
 
-    @PostMapping("/registrace")
+    @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegistrationRequest request) {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @PostMapping("/prihlaseni")
+    @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
 
