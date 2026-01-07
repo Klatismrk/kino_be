@@ -1,6 +1,6 @@
 package com.fandik.kino.auth.config;
 
-import com.fandik.kino.entity.UzivatelEntity;
+import com.fandik.kino.entities.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,13 +30,13 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UzivatelEntity uzivatelEntity) {
-        Collection<? extends GrantedAuthority> authorities = uzivatelEntity.getAuthorities();
+    public String generateToken(UserEntity userEntity) {
+        Collection<? extends GrantedAuthority> authorities = userEntity.getAuthorities();
 
         return Jwts.builder()
-                .claim("id", uzivatelEntity.getId())
+                .claim("id", userEntity.getId())
                 .claim("roles", authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
-                .setSubject(uzivatelEntity.getUsername())
+                .setSubject(userEntity.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)

@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class KinoApplication {
+public class CinemaApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(KinoApplication.class, args);
+		SpringApplication.run(CinemaApplication.class, args);
 	}
 
 }

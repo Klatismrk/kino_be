@@ -1,4 +1,4 @@
-package com.fandik.kino.entity;
+package com.fandik.kino.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -6,12 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "rezervace")
-@Table(name = "REZERVACE")
+@Entity(name = "reservation")
+@Table(name = "RESERVATIONS")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class RezervaceEntity {
+public class ReservationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -19,13 +19,13 @@ public class RezervaceEntity {
 
     @NotNull
     @ManyToOne
-    private UzivatelEntity uzivatel;
+    private UserEntity user;
 
     @NotNull
     @ManyToOne
-    private PredstaveniEntity predstaveni;
+    private PerformanceEntity performance;
 
     @NotNull
-    private int misto;
+    private int seat;
 
 }

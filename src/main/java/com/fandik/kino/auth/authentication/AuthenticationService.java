@@ -1,8 +1,8 @@
 package com.fandik.kino.auth.authentication;
 
 import com.fandik.kino.auth.config.JwtService;
-import com.fandik.kino.entity.UzivatelEntity;
-import com.fandik.kino.repository.UzivatelRepository;
+import com.fandik.kino.entities.UserEntity;
+import com.fandik.kino.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,17 +13,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final UzivatelRepository repository;
+    private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegistrationRequest request) {
-        var user = UzivatelEntity.builder()
-                .jmeno(request.getJmeno())
+        var user = UserEntity.builder()
+                .name(request.getJmeno())
                 .login(request.getLogin())
-                .heslo(passwordEncoder.encode(request.getHeslo()))
-                .role(UzivatelEntity.Role.ROLE_UZIVATEL)
+                .password(passwordEncoder.encode(request.getHeslo()))
+                .role(UserEntity.Role.ROLE_USER)
                 .build();
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);

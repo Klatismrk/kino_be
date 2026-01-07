@@ -1,4 +1,4 @@
-package com.fandik.kino.entity;
+package com.fandik.kino.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -13,13 +13,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-@Entity(name = "uzivatel")
-@Table(name = "UZIVATELE")
+@Entity(name = "user")
+@Table(name = "USERS")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-public class UzivatelEntity implements UserDetails {
+public class UserEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -29,10 +29,10 @@ public class UzivatelEntity implements UserDetails {
     private String login;
 
     @NotNull
-    private String jmeno;
+    private String name;
 
     @NotNull
-    private String heslo;
+    private String password;
 
     @NotNull
     @Enumerated
@@ -41,7 +41,7 @@ public class UzivatelEntity implements UserDetails {
     public enum Role {
 
         ROLE_ADMIN,
-        ROLE_UZIVATEL
+        ROLE_USER
 
     }
 
@@ -52,7 +52,7 @@ public class UzivatelEntity implements UserDetails {
 
     @Override
     public String getPassword() {
-        return heslo;
+        return password;
     }
 
     @Override

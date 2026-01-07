@@ -1,6 +1,6 @@
 package com.fandik.kino.auth.config;
 
-import com.fandik.kino.repository.UzivatelRepository;
+import com.fandik.kino.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,11 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    private final UzivatelRepository uzivatelRepository;
+    private final UserRepository userRepository;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> uzivatelRepository.findByLogin(username).orElseThrow(() -> new UsernameNotFoundException("Uživatel nenalezen"));
+        return username -> userRepository.findByLogin(username).orElseThrow(() -> new UsernameNotFoundException("Uživatel nenalezen"));
     }
 
     @Bean

@@ -1,4 +1,4 @@
-package com.fandik.kino.entity;
+package com.fandik.kino.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -6,27 +6,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
-
-@Entity(name = "predstaveni")
-@Table(name = "PREDSTAVENI")
+@Entity(name = "movie")
+@Table(name = "MOVIES")
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PredstaveniEntity {
+public class MovieEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-    @ManyToOne
-    private FilmEntity film;
+    private String name;
 
-    @NotNull
-    private String nazev;
-
-    @NotNull
-    private Date datum;
+    private String description;
 
 }
