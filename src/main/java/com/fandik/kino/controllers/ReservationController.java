@@ -21,75 +21,63 @@ import static com.fandik.kino.utils.Constants.ID;
 @CrossOrigin(origins = "http://localhost:3000")
 public class ReservationController {
 
-    private final ReservationService reservationService;
+  private final ReservationService reservationService;
 
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
+  public ReservationController(ReservationService reservationService) {
+    this.reservationService = reservationService;
+  }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationEntity>> getAllReservations(@AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity != null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                return new ResponseEntity<>(reservationService.findAll(), HttpStatus.OK);
-            } else if (roles.contains(ROLE_USER)) {
-                Long userId = userEntity.getId();
-                return new ResponseEntity<>(reservationService.findByUserId(userId), HttpStatus.OK);
-            }
+  @GetMapping
+  public ResponseEntity<List<ReservationEntity>> getAllReservations(@AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    return switch (userEntity.getRole()) {
+      case ROLE_ADMIN -> new ResponseEntity<>(reservationService.findAll(), HttpStatus.OK);
+      case ROLE_USER -> new ResponseEntity<>(reservationService.findByUserId(userEntity.getId()), HttpStatus.OK);
+    };
+  }
+
+  @GetMapping("/{id}")
+  public ResponseEntity<ReservationEntity> getOneById(@PathVariable(ID) Long id,
+                                                      @AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    return switch (userEntity.getRole()) {
+      case ROLE_ADMIN -> reservationService.findById(id)
+          .map(reservation -> new ResponseEntity<>(reservation, HttpStatus.OK))
+          .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+      case ROLE_USER -> reservationService.findByUserIdAndId(userEntity.getId(), id)
+          .map(reservation -> new ResponseEntity<>(reservation, HttpStatus.OK))
+          .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    };
+  }
+
+  @PostMapping
+  public ResponseEntity<ReservationEntity> save(@RequestBody ReservationEntity reservationEntity,
+                                                @AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    if (userEntity.getRole() != ROLE_ADMIN)
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    return new ResponseEntity<>(reservationService.save(reservationEntity), HttpStatus.CREATED);
+  }
+
+  @DeleteMapping("/{id}")
+  public ResponseEntity delete(@PathVariable(ID) Long id, @AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    return switch (userEntity.getRole()) {
+      case ROLE_ADMIN -> {
+        reservationService.deleteById(id);
+        yield  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      }
+      case ROLE_USER -> {
+        if (reservationService.findByUserIdAndId(userEntity.getId(), id).isPresent()) {
+          reservationService.deleteById(id);
+          yield  new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ReservationEntity> getOneById(@PathVariable(ID) Long id, @AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity != null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                Optional<ReservationEntity> reservations = reservationService.findById(id);
-                return reservations.map(reservation -> new ResponseEntity<>(reservation, HttpStatus.OK))
-                        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-            } else if (roles.contains(ROLE_USER)) {
-                Long userId = userEntity.getId();
-                Optional<ReservationEntity> reservation = reservationService.findByUserIdAndId(userId, id);
-                return reservation.map(res -> new ResponseEntity<>(res, HttpStatus.OK))
-                        .orElse(new ResponseEntity<>(HttpStatus.FORBIDDEN));
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
-    @PostMapping
-    public ResponseEntity<ReservationEntity> save(@RequestBody ReservationEntity reservationEntity, @AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity != null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                return new ResponseEntity<>(reservationService.save(reservationEntity), HttpStatus.CREATED);
-            } else if (roles.contains(ROLE_USER)) {
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable(ID) Long id, @AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity != null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                reservationService.deleteById(id);
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            } else if (roles.contains(ROLE_USER)) {
-                Optional<ReservationEntity> reservation = reservationService.findByUserIdAndId(
-                    userEntity.getId(), id);
-                if (reservation.isPresent()) {
-                    reservationService.deleteById(id);
-                    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-                } else {
-                    return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-                }
-            }
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
+        yield  new ResponseEntity<>(HttpStatus.FORBIDDEN);
+      }
+    };
+  }
 }

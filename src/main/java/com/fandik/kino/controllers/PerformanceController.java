@@ -20,47 +20,41 @@ import static com.fandik.kino.utils.Constants.ID;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PerformanceController {
 
-    private final PerformanceService performanceService;
+  private final PerformanceService performanceService;
 
-    public PerformanceController(PerformanceService performanceService) {
-        this.performanceService = performanceService;
-    }
+  public PerformanceController(PerformanceService performanceService) {
+    this.performanceService = performanceService;
+  }
 
-    @GetMapping
-    public ResponseEntity<List<PerformanceEntity>> getAllPerformances() {
-        return new ResponseEntity<>(performanceService.findAll(), HttpStatus.OK);
-    }
+  @GetMapping
+  public ResponseEntity<List<PerformanceEntity>> getAllPerformances() {
+    return new ResponseEntity<>(performanceService.findAll(), HttpStatus.OK);
+  }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PerformanceEntity> getOneById(@PathVariable(ID) Long id) {
-        Optional<PerformanceEntity> performances = performanceService.findById(id);
-        return performances.map(performance -> new ResponseEntity<>(performance, HttpStatus.OK))
-                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-    }
+  @GetMapping("/{id}")
+  public ResponseEntity<PerformanceEntity> getOneById(@PathVariable(ID) Long id) {
+    return performanceService.findById(id)
+        .map(performance -> new ResponseEntity<>(performance, HttpStatus.OK))
+        .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+  }
 
-    @PostMapping
-    public ResponseEntity<PerformanceEntity> save(@RequestBody PerformanceEntity performanceEntity, @AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity !=null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                return new ResponseEntity<>(performanceService.save(performanceEntity), HttpStatus.CREATED);
-            }
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
+  @PostMapping
+  public ResponseEntity<PerformanceEntity> save(@RequestBody PerformanceEntity performanceEntity,
+                                                @AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    if (userEntity.getRole() != ROLE_ADMIN)
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    return new ResponseEntity<>(performanceService.save(performanceEntity), HttpStatus.CREATED);
+  }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity delete(@PathVariable(ID) Long id, @AuthenticationPrincipal UserEntity userEntity) {
-        if (userEntity !=null) {
-            List<String> roles = userEntity.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
-            if (roles.contains(ROLE_ADMIN)) {
-                performanceService.deleteById(id);
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-    }
-
+  @DeleteMapping("/{id}")
+  public ResponseEntity delete(@PathVariable(ID) Long id, @AuthenticationPrincipal UserEntity userEntity) {
+    if (userEntity == null)
+      return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    if (userEntity.getRole() != ROLE_ADMIN)
+      return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+    performanceService.deleteById(id);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 }
